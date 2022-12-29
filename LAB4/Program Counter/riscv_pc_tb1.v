@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-
+// TB1: Check the module PC is correct
 module riscv_core_sim_tb1 ();
 
 	parameter 	RESET_SP = 32'h0000;
@@ -80,7 +80,7 @@ module riscv_core_sim_tb1 ();
 	.reset_i(reset_i),
 	// Your code
 	//{{{		
-	.iaddr_i(if_next_addr_w),
+	.iaddr_i(iaddr_d),
 	.ird_i(ird_i),		
 	//}}}
 	.daddr_i(daddr_i),

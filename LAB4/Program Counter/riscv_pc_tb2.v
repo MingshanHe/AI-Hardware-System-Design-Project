@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-
+// TB2: Check the output of PC to connect with Memory
 module riscv_core_sim_tb2 ();
 	
 	parameter 	RESET_SP = 32'h0000;
@@ -184,11 +184,11 @@ module riscv_core_sim_tb2 ();
 					ird_i = 1'b1;
 			#(p)	ird_i = 1'b0;				
 					$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_d, irdata_o);	
-			#(4*p) 	//iaddr_i = 32'h20;
+			#(20*p) 	//iaddr_i = 32'h20;
 					ird_i = 1'b1;
 					branch_taken_w = 1'b1;
 					jump_addr_w = 32'h0C;					
-			#(p)	ird_i = 1'b0;		
+			#(20*p)	ird_i = 1'b0;		
 					branch_taken_w = 1'b0;
 					$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_d, irdata_o);	
 		end
@@ -196,7 +196,7 @@ module riscv_core_sim_tb2 ();
    end
 	always @(posedge clk_i) begin 
 		iaddr_i <= if_next_addr_w;	  
-		iaddr_d <= iaddr_i;
+		iaddr_d <= if_next_addr_w;
 	end     
 endmodule
 
