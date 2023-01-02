@@ -80,7 +80,7 @@ module riscv_core_sim_tb1 ();
 	.reset_i(reset_i),
 	// Your code
 	//{{{		
-	.iaddr_i(iaddr_d),
+	.iaddr_i(iaddr_i),
 	.ird_i(ird_i),		
 	//}}}
 	.daddr_i(daddr_i),

@@ -29,7 +29,7 @@ always @(posedge clk_i or negedge reset_i) begin
 		end
 		else begin
 			//if_addr_r <= if_addr_r + 32'h4/*insert your code*/;
-			if_addr_r <= if_next_addr_w + 32'h4;
+			if_addr_r <= if_next_addr_w + 'd4;
 		end
 		//}}}
 	end

@@ -77,7 +77,22 @@ localparam
 				ird_i = 1'b1;
 		#(p)	ird_i = 1'b0;	
 				$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_i, irdata_o);
-				
+		#(4*p) 	iaddr_i = 32'h14;
+				ird_i = 1'b1;
+		#(p)	ird_i = 1'b0;	
+				$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_i, irdata_o);
+		#(4*p) 	iaddr_i = 32'h18;
+				ird_i = 1'b1;
+		#(p)	ird_i = 1'b0;	
+				$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_i, irdata_o);
+		#(4*p) 	iaddr_i = 32'h1d;
+				ird_i = 1'b1;
+		#(p)	ird_i = 1'b0;	
+				$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_i, irdata_o);
+		#(4*p) 	iaddr_i = 32'h20;
+				ird_i = 1'b1;
+		#(p)	ird_i = 1'b0;	
+				$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_i, irdata_o);
    end
 endmodule
 

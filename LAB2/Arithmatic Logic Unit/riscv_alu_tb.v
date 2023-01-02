@@ -127,7 +127,4 @@ module riscv_alu_tb ();
 		#(2*p) alu_op_i = `ALU_SLTU;	
 		#(p)   $display("T=%03t ns: %h < %h = %h (Unsigned)\n",$realtime/1000, alu_a_i, alu_b_i,alu_p_o);
    end
-
-    
 endmodule
-

@@ -62,7 +62,7 @@ module riscv_multiplier(
 		if (mul_busy_r) begin							    //*** states repeat LSB check - add - shift in sequence during multiplication
 		  //Insert your code
 		  mul_count_r  <= mul_count_r - 5'd1;
-		  //mul_count_r <= /*Insert your code */			//*** counter check for state-end
+		  /*Insert your code */								//*** counter check for state-end
 		  mul_res_r   <= { mul_sum_w, mul_res_r[31:1] };    //*** 64bit width register composed by previous adder result and multiplier b 
 															//*** uppper with adder result (or initial multiplicand a), lower with multiplier b
 															//*** 1bit shift right per state change

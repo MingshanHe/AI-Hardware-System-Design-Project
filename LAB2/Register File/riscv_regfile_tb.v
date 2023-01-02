@@ -40,9 +40,7 @@ module riscv_regfile_tb;
         //#2 		rstn = 0;
         #20 	rstn = 1;		// Reset
 
-
 	////////// WRITE /////////
-        
         ra0_i = 5'b0000; 		// Select R0
         rb0_i = 5'b0001; 		// Select R1
             
@@ -52,40 +50,23 @@ module riscv_regfile_tb;
 				rd0_i =  5'b0001;
         #10 	wr = 0; 
 
-
         #20 	rb0_i = 5'b0111;// Select R7
                 rd0_i =  5'b0111;
         #20 	rd0_value_i = 32'h5678;
 
         #20 	wr = 1;			// write to R7
-                rd0_i =  5'b0111;
         #10 	wr = 0;
-     
-
 	///////////////////////////
 
-
-
 	/////////// READ //////////
-        
         #20 	ra0_i = 5'b0100;		// Read R4
-        #5 $display("[Display] R4 ra0_i = 0x0%h",ra0_value_o);
 				rb0_i = 5'b0101;		// Read R5
-        #5 $display("[Display] R5 rb0_i = 0x0%h",rb0_value_o);
         #20 	ra0_i = 5'b0111;		// Read R7
-        #5 $display("[Display] R7 ra0_i = 0x0%h",ra0_value_o);
         #20 	rb0_i = 5'b0001;		// Read R1
-        #5 $display("[Display] R1 rb0_i = 0x0%h",rb0_value_o);
 	////////////////////////////
 
         #20 
         #20 	rstn = 0;
-        #20 	rstn = 1;
-                   
+        #20 	rstn = 1;   
     end
-    
-    
 endmodule
-
-
-

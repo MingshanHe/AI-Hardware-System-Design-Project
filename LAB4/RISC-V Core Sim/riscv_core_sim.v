@@ -115,16 +115,16 @@ always @ (*) begin
 		`BR_NE: begin	
 		// Insert your code
 		//{{{		
-			// branch_taken_w = 1'b1;	
-			// jump_addr_w = 32'h00;
+			branch_taken_w = 1'b1;	
+			jump_addr_w = if_pc_d + id_imm_w;
 		//}}}
 		end
 		`BR_LT: begin		
 		// Insert your code
 		//{{{		
 			// Dummy Branch
-			branch_taken_w = 1'b1;		
-			// jump_addr_w = ;
+			// branch_taken_w = 1'b1;		
+			jump_addr_w = if_pc_d + id_imm_w;
 		//}}}		
 		end
 		`BR_GE: begin

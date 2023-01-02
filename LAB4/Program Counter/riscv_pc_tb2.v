@@ -65,7 +65,7 @@ module riscv_core_sim_tb2 ();
 	riscv_pc u_pc(
 	./*input 				*/clk_i(clk_i),		// Clock
 	./*input 				*/reset_i(reset_i),	// Reset
-	//Your code
+	//Insert Your code
 	//{{{
 	./*input 				*/ird(ird_i),				// Instruction Read request
 	./*input 				*/branch_taken_w(branch_taken_w),	// Jump instruction
@@ -78,7 +78,7 @@ module riscv_core_sim_tb2 ();
 	u_memory (
 	.clk_i(clk_i),
 	.reset_i(reset_i),
-	// Your code
+	//Insert Your code
 	//{{{		
 	.iaddr_i(if_next_addr_w),
 	.ird_i(ird_i),		
@@ -184,19 +184,12 @@ module riscv_core_sim_tb2 ();
 					ird_i = 1'b1;
 			#(p)	ird_i = 1'b0;				
 					$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_d, irdata_o);	
-			#(20*p) 	//iaddr_i = 32'h20;
-					ird_i = 1'b1;
-					branch_taken_w = 1'b1;
-					jump_addr_w = 32'h0C;					
-			#(20*p)	ird_i = 1'b0;		
-					branch_taken_w = 1'b0;
-					$display("T=%03t ns: %h : %h\n",$realtime/1000, iaddr_d, irdata_o);	
 		end
 				
    end
 	always @(posedge clk_i) begin 
 		iaddr_i <= if_next_addr_w;	  
-		iaddr_d <= if_next_addr_w;
+		iaddr_d <= iaddr_i;
 	end     
 endmodule
 
