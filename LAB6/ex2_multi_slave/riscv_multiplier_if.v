@@ -85,8 +85,8 @@ begin
 	else begin
 		if(sl_HSEL && sl_HREADY && ((sl_HTRANS == `TRANS_NONSEQ) || (sl_HTRANS == `TRANS_SEQ)))
 		begin
-			//q_sel_sl_reg <= sl_HADDR[/*Insert your code*/];
-			//q_ld_sl_reg <= /*Insert your code*/;
+			q_sel_sl_reg <= sl_HADDR[W_REGS+W_WB_DATA-1:W_WB_DATA]/*Insert your code*/;
+			q_ld_sl_reg  <= sl_HWRITE/*Insert your code*/;
 		end
 		else begin
 			q_ld_sl_reg <= 1'b0;
@@ -114,9 +114,9 @@ begin
 			case(q_sel_sl_reg) 
 				REG_MUL_OP_I: alu_op_i <= sl_HWDATA;
 				REG_MUL_A_I: alu_a_i <= sl_HWDATA;
-				//REG_MUL_B_I: alu_b_i <= /*Insert your code*/;
+				REG_MUL_B_I: alu_b_i <= sl_HWDATA/*Insert your code*/;
 				REG_MUL_A_SIGNED: a_signed <= sl_HWDATA;
-				//REG_MUL_B_SIGNED: b_signed <= /*Insert your code*/;	
+				REG_MUL_B_SIGNED: b_signed <= sl_HWDATA/*Insert your code*/;	
 			endcase
 		end
 	end
@@ -130,9 +130,9 @@ begin:rdata
 	case(q_sel_sl_reg) 
 		REG_MUL_OP_I: out_sl_HRDATA = alu_op_i;
 		REG_MUL_A_I: out_sl_HRDATA = alu_a_i;
-		//REG_MUL_B_I: out_sl_HRDATA = /*Insert your code*/;
+		REG_MUL_B_I: out_sl_HRDATA = alu_b_i/*Insert your code*/;
 		REG_MUL_A_SIGNED: out_sl_HRDATA = a_signed;
-		//REG_MUL_B_SIGNED: out_sl_HRDATA = /*Insert your code*/;	
+		REG_MUL_B_SIGNED: out_sl_HRDATA = b_signed/*Insert your code*/;	
 		REG_MUL_P_O_LO: out_sl_HRDATA = alu_p_o[31:0];
 		REG_MUL_P_O_HI: out_sl_HRDATA =  alu_p_o[63:32];
 		REG_MUL_EX_STALL: out_sl_HRDATA = ex_stall_mul_w;
