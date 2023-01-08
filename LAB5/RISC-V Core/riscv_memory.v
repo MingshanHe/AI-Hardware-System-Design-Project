@@ -1,6 +1,6 @@
 module riscv_memory #(
   parameter     SIZE     = 8192,
-  parameter     FIRMWARE = "mem.hex"
+  parameter     FIRMWARE = "mem_opt2.hex"
 )(
   input         clk_i,
   input         reset_i,
