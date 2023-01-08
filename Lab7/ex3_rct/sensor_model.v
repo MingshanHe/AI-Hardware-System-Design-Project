@@ -80,7 +80,7 @@ always@(start) begin
 				org_R[WIDTH*i+j] = temp_BMP[WIDTH*3*(HEIGHT-i-1)+3*j+0];
 				org_G[WIDTH*i+j] = temp_BMP[WIDTH*3*(HEIGHT-i-1)+3*j+1];
 				/* Insert your code here */           
-				//org_B[] = ;
+				org_B[WIDTH*i+j] = temp_BMP[WIDTH*3*(HEIGHT-i-1)+3*j+2];
                 /*************************/			
             end
         end
@@ -130,14 +130,14 @@ always @(*) begin
                     nstate = ST_VSYNC;
         end	
         ST_HSYNC: begin
-                //if(ctrl_hsync_cnt == /* Insert your code here */) 
-                //    nstate = /* Insert your code here */;
-                //else
-                //    nstate = ST_HSYNC;
+                if(ctrl_hsync_cnt == HSYNC_DELAY/* Insert your code here */) 
+                    nstate = ST_DATA/* Insert your code here */;
+                else
+                    nstate = ST_HSYNC;
         end		
         ST_DATA: begin
                 if(ctrl_done) begin   //end of frame
-					//nstate = /* Insert your code here */;
+					nstate = ST_VSYNC/* Insert your code here */;
 				end
                 else begin
                     if(col == WIDTH - 2)    //end of line
@@ -224,11 +224,11 @@ always @(*) begin
         DATA_R0 = org_R[WIDTH * row + col   ];
         DATA_G0 = org_G[WIDTH * row + col   ];
         /* Insert your code here */
-        //DATA_B0 ;                                         
+        DATA_B0 = org_B[WIDTH * row + col   ];                                         
         DATA_R1 = org_R[WIDTH * row + col +1];
         DATA_G1 = org_G[WIDTH * row + col +1];
         /* Insert your code here */
-        //DATA_B1 ;                             	
+        DATA_B1 = org_B[WIDTH * row + col +1];                             	
         end
 end
 

@@ -71,8 +71,8 @@ always@(posedge HCLK, negedge HRESETn) begin
             out_BMP[WIDTH*3*(HEIGHT-l-1)+6*m  ] <= DATA_RECON_B0;
             out_BMP[WIDTH*3*(HEIGHT-l-1)+6*m+5] <= DATA_RECON_R1;
             /*Insert your code*/
-            //out_BMP[] <= DATA_RECON_G1;
-            //out_BMP[] <= DATA_RECON_B1;
+            out_BMP[WIDTH*3*(HEIGHT-l-1)+6*m+4] <= DATA_RECON_G1;
+            out_BMP[WIDTH*3*(HEIGHT-l-1)+6*m+3] <= DATA_RECON_B1;
             /******************/
         end
     end
@@ -136,8 +136,8 @@ always@(DEC_DONE) begin
             $fwrite(fd, "%c", out_BMP[i+2][7:0]);
             $fwrite(fd, "%c", out_BMP[i+3][7:0]);
             /* Insert your code */
-            //$fwrite(fd, "%c", out_BMP[][]);
-            //$fwrite(fd, "%c", out_BMP[][]);
+            $fwrite(fd, "%c", out_BMP[i+4][7:0]);
+            $fwrite(fd, "%c", out_BMP[i+5][7:0]);
             /********************/
         end
 

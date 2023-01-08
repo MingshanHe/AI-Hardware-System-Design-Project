@@ -77,7 +77,7 @@ sensor_model
 
 /* Insert your code here */
 // Dummy 
-assign br_mode = 1'b1;
+assign br_mode = 1'b0;
 assign br_value = 8'd100;
 //{{{
 //assign br_mode = ;	//1: brighter, 0: darker
