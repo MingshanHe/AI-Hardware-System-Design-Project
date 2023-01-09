@@ -247,6 +247,7 @@ begin:rdata
 		end
 		LCD_DRIVE_HEIGHT: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_height;
 		end
 		LCD_DRIVE_START_UP_DELAY: begin 
 			out_sl_HRDATA = q_start_up_delay;
@@ -265,15 +266,19 @@ begin:rdata
 		end
 		LCD_DRIVE_DATA_COUNT: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_data_count;
 		end
 		LCD_DRIVE_START: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_start;
 		end
 		LCD_DRIVE_BR_MODE: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_br_mode;
 		end
 		LCD_DRIVE_BR_VALUE: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_br_value;
 		end
 	endcase
 end
@@ -292,10 +297,10 @@ end
 always @(*) begin
     case(cstate)
 	ST_IDLE: begin
-                //if(/*Insert your code*/)
-                //    nstate = ST_VSYNC;
-                //else
-                //    nstate = ST_IDLE;
+                if(q_start/*Insert your code*/)
+                   nstate = ST_VSYNC;
+                else
+                   nstate = ST_IDLE;
         end		
         ST_VSYNC: begin
                 if(ctrl_vsync_cnt == q_start_up_delay) 
@@ -304,19 +309,19 @@ always @(*) begin
                     nstate = ST_VSYNC;
         end	
         ST_HSYNC: begin
-                //if(ctrl_hsync_cnt == /*Insert your code*/) 
-                //    nstate = ST_DATA;
-                //else
-                //    nstate = ST_HSYNC;
+                if(ctrl_hsync_cnt == q_hsync_delay/*Insert your code*/) 
+                   nstate = ST_DATA;
+                else
+                   nstate = ST_HSYNC;
         end		
         ST_DATA: begin
                 if(end_frame)    //end of frame
                     nstate = ST_IDLE;
                 else begin
-                    //if(col == /*Insert your code*/)//end of line
-                    //    nstate = ST_HSYNC;
-                    //else
-                    //    nstate = ST_DATA;
+                    if(col == q_width - 2/*Insert your code*/)//end of line
+                       nstate = ST_HSYNC;
+                    else
+                       nstate = ST_DATA;
                 end
         end
         default: nstate = ST_IDLE;
@@ -361,10 +366,10 @@ begin
 			if(col == q_width - 2) begin
 				row <= row + 1;
 			end
-			//if(col == /*Insert your code*/) 
-			//	col <= 0;
-			//else 
-			//	col <= col + 2;
+			if(col == q_width - 2/*Insert your code*/) 
+				col <= 0;
+			else 
+				col <= col + 2;
 		end
 	end
 end
@@ -382,7 +387,7 @@ begin
 		end
     end
 end
-//assign end_frame = (data_count == /*Insert your code*/)? 1'b1: 1'b0;			
+assign end_frame = (data_count == 393216/*Insert your code*/)? 1'b1: 1'b0;			
 			
 
 //-------------------------------------------------
@@ -458,9 +463,9 @@ always @(*) begin
         DATA_R0 = out_rgb_pixel_dual[16+:IMG_PIX_W];
         DATA_G0 = out_rgb_pixel_dual[ 8+:IMG_PIX_W];
         DATA_B0 = out_rgb_pixel_dual[ 0+:IMG_PIX_W];
-        //DATA_R1 = out_rgb_pixel_dual[/*Insert your code*/];
-        //DATA_G1 = out_rgb_pixel_dual[/*Insert your code*/];
-        //DATA_B1 = out_rgb_pixel_dual[/*Insert your code*/];
+        DATA_R1 = out_rgb_pixel_dual[40+:IMG_PIX_W/*Insert your code*/];
+        DATA_G1 = out_rgb_pixel_dual[32+:IMG_PIX_W/*Insert your code*/];
+        DATA_B1 = out_rgb_pixel_dual[24+:IMG_PIX_W/*Insert your code*/];
     end
 end
 //}}}
