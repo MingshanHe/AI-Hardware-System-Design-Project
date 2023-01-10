@@ -29,9 +29,9 @@ always @(posedge clk or negedge rst_n) begin
     end else begin
         if(in_valid) begin
             y0  <= {2'b0,tmp_y0[9:2]};
-            //y1  <= /*Insert your code here*/;
+            y1  <= {2'b0,tmp_y1[9:2]}/*Insert your code here*/;
             cb0 <= tmp_cb;
-            //cr0 <= /*Insert your code here*/;
+            cr0 <= tmp_cr/*Insert your code here*/;
             out_valid <= 1;
         end else begin
             y0  <= 0;

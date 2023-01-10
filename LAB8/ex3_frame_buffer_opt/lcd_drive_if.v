@@ -214,6 +214,7 @@ begin
 				end 
 				LCD_DRIVE_HEIGHT: begin 
 					/* Insert your code */
+					q_height <= sl_HWDATA[W_SIZE-1 :0];
 				end
 				LCD_DRIVE_START_UP_DELAY: begin 
 					q_start_up_delay <= sl_HWDATA[W_DELAY-1 :0];	
@@ -232,15 +233,19 @@ begin
 				end
 				LCD_DRIVE_DATA_COUNT: begin 
 					/* Insert your code */
+					q_data_count <= sl_HWDATA[W_DELAY-1 :0];
 				end
 				LCD_DRIVE_START: begin 
 					/* Insert your code */
+					q_start <= sl_HWDATA[W_DELAY-1 :0];
 				end
 				LCD_DRIVE_BR_MODE: begin 
 					/* Insert your code */
+					q_br_mode <= sl_HWDATA[W_DELAY-1 :0];
 				end
 				LCD_DRIVE_BR_VALUE: begin 
 					/* Insert your code */
+					q_br_value <= sl_HWDATA[W_DELAY-1 :0];
 				end
 			endcase
 		end
@@ -258,6 +263,7 @@ begin:rdata
 		end
 		LCD_DRIVE_HEIGHT: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_height;
 		end
 		LCD_DRIVE_START_UP_DELAY: begin 
 			out_sl_HRDATA = q_start_up_delay;
@@ -276,15 +282,19 @@ begin:rdata
 		end
 		LCD_DRIVE_DATA_COUNT: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_data_count;
 		end
 		LCD_DRIVE_START: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_start;
 		end
 		LCD_DRIVE_BR_MODE: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_br_mode;
 		end
 		LCD_DRIVE_BR_VALUE: begin 
 			/* Insert your code */
+			out_sl_HRDATA = q_br_value;
 		end
 	endcase
 end
@@ -303,10 +313,10 @@ end
 always @(*) begin
     case(cstate)
 	ST_IDLE: begin
-                //if(/*Insert your code*/)
-                //    nstate = ST_VSYNC;
-                //else
-                //    nstate = ST_IDLE;
+                if(q_start/*Insert your code*/)
+                   nstate = ST_VSYNC;
+                else
+                   nstate = ST_IDLE;
         end		
         ST_VSYNC: begin
                 if(ctrl_vsync_cnt == q_start_up_delay) 
@@ -315,19 +325,19 @@ always @(*) begin
                     nstate = ST_VSYNC;
         end	
         ST_HSYNC: begin
-                //if(ctrl_hsync_cnt == /*Insert your code*/) 
-                //    nstate = ST_DATA;
-                //else
-                //    nstate = ST_HSYNC;
+                if(ctrl_hsync_cnt == q_hsync_delay/*Insert your code*/) 
+                   nstate = ST_DATA;
+                else
+                   nstate = ST_HSYNC;
         end		
         ST_DATA: begin
                 if(end_frame)    //end of frame
                     nstate = ST_IDLE;
                 else begin
-                    //if(col == /*Insert your code*/)//end of line
-                    //    nstate = ST_HSYNC;
-                    //else
-                    //    nstate = ST_DATA;
+                    if(col == q_width - 2/*Insert your code*/)//end of line
+                       nstate = ST_HSYNC;
+                    else
+                       nstate = ST_DATA;
                 end
         end
         default: nstate = ST_IDLE;
@@ -372,10 +382,10 @@ begin
 			if(col == q_width - 2) begin
 				row <= row + 1;
 			end
-			//if(col == /*Insert your code*/) 
-			//	col <= 0;
-			//else 
-			//	col <= col + 2;
+			if(col == q_width - 2/*Insert your code*/) 
+				col <= 0;
+			else 
+				col <= col + 2;
 		end
 	end
 end
@@ -393,7 +403,7 @@ begin
 		end
     end
 end
-//assign end_frame = (data_count == /*Insert your code*/)? 1'b1: 1'b0;		
+assign end_frame = (data_count == 393216/*Insert your code*/)? 1'b1: 1'b0;		
 
 //-------------------------------------------------
 // Frame buffer
@@ -466,9 +476,9 @@ lcd_forward_rct u_forward_rct ( //{{{
     /* input*/.r0            (in_pixel_rct[16+:IMG_PIX_W]),
     /* input*/.g0            (in_pixel_rct[ 8+:IMG_PIX_W]),
     /* input*/.b0            (in_pixel_rct[ 0+:IMG_PIX_W]), 
-    /* input*/.r1            (/*Insert your code*/), 
-    /* input*/.g1            (/*Insert your code*/),
-    /* input*/.b1            (/*Insert your code*/), 
+    /* input*/.r1            (in_pixel_rct[ 40+:IMG_PIX_W]/*Insert your code*/), 
+    /* input*/.g1            (in_pixel_rct[ 32+:IMG_PIX_W]/*Insert your code*/),
+    /* input*/.b1            (in_pixel_rct[ 24+:IMG_PIX_W]/*Insert your code*/), 
     /*output*/.out_valid     (rct_o_valid),
     /*output*/.y0            (rct_dout_y0),
     /*output*/.y1            (rct_dout_y1), 
@@ -497,9 +507,9 @@ lcd_inverse_rct u_inverse_rct
     ./*input signed [WAVE_PIX_W-1:0] */y0 (out_rgb_pixel_dual[ 0+:WAVE_PIX_W]),
 	./*input signed [WAVE_PIX_W-1:0] */cb0(out_rgb_pixel_dual[20+:WAVE_PIX_W]),
 	./*input signed [WAVE_PIX_W-1:0] */cr0(out_rgb_pixel_dual[30+:WAVE_PIX_W]), 
-    ./*input signed [WAVE_PIX_W-1:0] */y1 (/*Insert your code*/),
-	./*input signed [WAVE_PIX_W-1:0] */cb1(/*Insert your code*/),
-	./*input signed [WAVE_PIX_W-1:0] */cr1(/*Insert your code*/), 
+    ./*input signed [WAVE_PIX_W-1:0] */y1 (out_rgb_pixel_dual[10+:WAVE_PIX_W]/*Insert your code*/),
+	./*input signed [WAVE_PIX_W-1:0] */cb1(out_rgb_pixel_dual[20+:WAVE_PIX_W]/*Insert your code*/),
+	./*input signed [WAVE_PIX_W-1:0] */cr1(out_rgb_pixel_dual[30+:WAVE_PIX_W]/*Insert your code*/), 
     ./*output reg */out_valid(recon_valid),
     ./*output [IMG_PIX_W-1:0] */r0(recon_data_R0),
 	./*output [IMG_PIX_W-1:0] */g0(recon_data_G0),
