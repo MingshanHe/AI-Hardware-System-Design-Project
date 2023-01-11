@@ -59,11 +59,13 @@ initial begin
 	dia   = 0;
 	
 	// set signal for dual_port_block_ram access
-	//for(/* Insert your code */) begin
-	//	#(4*CLOCK_PERIOD) 	enb = 1'b1;
-	//						/* Insert your code */
-	//	#(CLOCK_PERIOD) 	enb = 1'b0;					
-	//end
+	for(i = 0; i < 16; i = i+1/* Insert your code */) begin
+		#(4*CLOCK_PERIOD) 	enb = 1'b1;
+							/* Insert your code */
+							
+		#(CLOCK_PERIOD) 	enb = 1'b0;		
+							addrb <= addrb + 'd1;			
+	end
 
 end
 
@@ -76,8 +78,41 @@ always@(posedge clk) begin
 	if(enb) begin
 		// TODO: set 'weight_store' and 'weight'
 		/* Insert your code */
-		
+
 		/********************/
+		weight_store[0]= dob[0+:IN_PIXEL_W];
+		weight_store[1]= dob[8+:IN_PIXEL_W];
+		weight_store[2]= dob[16+:IN_PIXEL_W];
+		weight_store[3]= dob[24+:IN_PIXEL_W];
+		weight_store[4]= dob[32+:IN_PIXEL_W];
+		weight_store[5]= dob[40+:IN_PIXEL_W];
+		weight_store[6]= dob[48+:IN_PIXEL_W];
+		weight_store[7]= dob[56+:IN_PIXEL_W];
+		weight_store[8]= dob[64+:IN_PIXEL_W];
+		weight_store[9]= dob[72+:IN_PIXEL_W];
+		weight_store[10]= dob[80+:IN_PIXEL_W];
+		weight_store[11]= dob[88+:IN_PIXEL_W];
+		weight_store[12]= dob[96+:IN_PIXEL_W];
+		weight_store[13]= dob[104+:IN_PIXEL_W];
+		weight_store[14]= dob[112+:IN_PIXEL_W];
+		weight_store[15]= dob[120+:IN_PIXEL_W];
+
+		weight[0]= weight_store[0] *2 +1;
+		weight[1]= weight_store[1] *2 +1;
+		weight[2]= weight_store[2] *2 +1;
+		weight[3]= weight_store[3] *2 +1;
+		weight[4]= weight_store[4] *2 +1;
+		weight[5]= weight_store[5] *2 +1;
+		weight[6]= weight_store[6] *2 +1;
+		weight[7]= weight_store[7] *2 +1;
+		weight[8]= weight_store[8] *2 +1;
+		weight[9]= weight_store[9] *2 +1;
+		weight[10]= weight_store[10] *2 +1;
+		weight[11]= weight_store[11] *2 +1;
+		weight[12]= weight_store[12] *2 +1;
+		weight[13]= weight_store[13] *2 +1;
+		weight[14]= weight_store[14] *2 +1;
+		weight[15]= weight_store[15] *2 +1;	
 	end
 end
 
