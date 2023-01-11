@@ -31,8 +31,10 @@ out = zeros(h_out,w_out,c_out);		% buffer of output feature maps
 for k = 1:c_out				% Number of output channels
     for i = 1:h_out			% Row
         for j = 1:w_out		% Column
-			% Insert your code
-			
+			% Insert your code                
+            scalar = kernel(:,:,:,k).*...
+                pad_img(1+(i-1)*s:1+(i-1)*s+f-1,1+(j-1)*s:1+(j-1)*s+f-1,:);
+            out(i,j,k) = sum(scalar(:));
         end
     end
 end

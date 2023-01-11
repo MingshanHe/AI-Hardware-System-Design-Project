@@ -19,6 +19,7 @@ pad_img(1+st_p:st_p+h,1+st_p:st_p+w,:) = img;
 
 % Filter kernel size
 f = size(kernel,1);
+disp(f);
 
 % Output feature maps
 c_out = size(kernel,4);				% Number of output features
@@ -32,6 +33,10 @@ for k = 1:c_out				% Number of output channels
     for i = 1:h_out			% Row
         for j = 1:w_out		% Column
 			% Insert your code
+                scalar = kernel(:,:,:,k).*...
+                    pad_img(1+(i-1)*s:1+(i-1)*s+f-1,1+(j-1)*s:1+(j-1)*s+f-1,:);
+
+                out(i,j,k) = sum(scalar(:));
 			
         end
     end

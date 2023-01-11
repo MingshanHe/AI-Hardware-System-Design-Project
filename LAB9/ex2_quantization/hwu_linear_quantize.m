@@ -14,3 +14,16 @@ activations = x;
 activations_store = x;
 
 % Insert your code
+%Maximum and Minimum Ranges
+pos_end = 2 ^ (nbit - 1) -1;
+neg_end = -pos_end - 1;
+
+% Quantization
+activations_store = round(x/(2^biases_shift*(step)));
+
+% Linear activation
+activations_store(activations_store>pos_end) = pos_end;
+activations_store(activations_store<neg_end) = neg_end;
+
+activations = activations_store;
+ 
