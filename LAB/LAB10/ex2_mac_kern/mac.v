@@ -57,7 +57,6 @@ mul #(.WI(WI+1)) u_mul_13(.w(weight[(13*(WI+1))+:(WI+1)]),.x(activation[(13*(WI+
 mul #(.WI(WI+1)) u_mul_14(.w(weight[(14*(WI+1))+:(WI+1)]),.x(activation[(14*(WI+1))+:(WI+1)]),.y(y0[14]));
 mul #(.WI(WI+1)) u_mul_15(.w(weight[(15*(WI+1))+:(WI+1)]),.x(activation[(15*(WI+1))+:(WI+1)]),.y(y0[15]));
 
-
 //-------------------------------------------------
 // Hierarchical Adder
 //-------------------------------------------------
@@ -111,12 +110,11 @@ always@(posedge clk, negedge rstn) begin
 	end
 	else begin
 		/* insert your code */
-			vld_d[0] <= vld_i;
+		vld_d[0] <= vld_i;
 		vld_d[1] <= vld_d[0];
 		vld_d[2] <= vld_d[1];
 		vld_d[3] <= vld_d[2];
-		vld_d[4] <= vld_d[3];	
-
+		vld_d[4] <= vld_d[3];
 	end
 end
 assign vld_o = vld_d[WN];
