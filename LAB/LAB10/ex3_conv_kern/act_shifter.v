@@ -29,8 +29,8 @@ module act_shifter(
             'd3: d_out_r = {{3{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:3]};
             'd4: d_out_r = {{4{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:4]};
             'd5: d_out_r = {{5{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:5]};
-            //'d6: d_out_r = /*Insert your code*/;
-            //'d7: d_out_r = /*Insert your code*/;
+            'd6: d_out_r = {{6{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:6]}/*Insert your code*/;
+            'd7: d_out_r = {{7{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:7]}/*Insert your code*/;
             default: d_out_r = 'h0;
         endcase
     end

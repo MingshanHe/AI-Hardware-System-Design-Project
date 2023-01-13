@@ -29,10 +29,10 @@ module bias_shifter(
             'd5 : d_out_r = {{ 5{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:5]};
             'd6 : d_out_r = {{ 6{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:6]};
             'd7 : d_out_r = {{ 7{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:7]};
-            //'d8 : d_out_r = /*Insert your code*/;
-            //'d9 : d_out_r = /*Insert your code*/;
-            //'d10: d_out_r = /*Insert your code*/;
-            //'d11: d_out_r = /*Insert your code*/;
+            'd8 : d_out_r = {{ 8{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:8]}/*Insert your code*/;
+            'd9 : d_out_r = {{ 9{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:9]}/*Insert your code*/;
+            'd10: d_out_r = {{10{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:10]}/*Insert your code*/;
+            'd11: d_out_r = {{11{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:11]}/*Insert your code*/;
             'd12: d_out_r = {{12{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:12]};
             'd13: d_out_r = {{13{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:13]};
             'd14: d_out_r = {{14{d_in[DATA_BITS-1]}}, d_in[DATA_BITS-1:14]};

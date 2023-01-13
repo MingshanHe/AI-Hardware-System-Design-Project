@@ -54,7 +54,8 @@ mul #(.WI(WI+1)) u_mul_11(.w(weight[(11*(WI+1))+:(WI+1)]),.x(activation[(11*(WI+
 mul #(.WI(WI+1)) u_mul_12(.w(weight[(12*(WI+1))+:(WI+1)]),.x(activation[(12*(WI+1))+:(WI+1)]),.y(y0[12]));
 mul #(.WI(WI+1)) u_mul_13(.w(weight[(13*(WI+1))+:(WI+1)]),.x(activation[(13*(WI+1))+:(WI+1)]),.y(y0[13]));
 /* insert your code */
-
+mul #(.WI(WI+1)) u_mul_14(.w(weight[(14*(WI+1))+:(WI+1)]),.x(activation[(14*(WI+1))+:(WI+1)]),.y(y0[14]));
+mul #(.WI(WI+1)) u_mul_15(.w(weight[(15*(WI+1))+:(WI+1)]),.x(activation[(15*(WI+1))+:(WI+1)]),.y(y0[15]));
 
 //-------------------------------------------------
 // Hierarchical Adder
@@ -90,10 +91,12 @@ always@(posedge clk, negedge rstn) begin
 		y2[3] <= $signed(y1[6]) + $signed(y1[ 7]);
 		/* insert your code */
 		// Level 3
-		
+		y3[0] <= $signed(y2[0]) + $signed(y2[ 1]);
+		y3[1] <= $signed(y2[2]) + $signed(y2[ 3]);
 
 		// Level 4
 		/* insert your code */
+		y4	<= y3[0] + y3[1];
 
 	end
 end
@@ -107,8 +110,11 @@ always@(posedge clk, negedge rstn) begin
 	end
 	else begin
 		/* insert your code */
-		
-
+		vld_d[0] <= vld_i;
+		vld_d[1] <= vld_d[0];
+		vld_d[2] <= vld_d[1];
+		vld_d[3] <= vld_d[2];
+		vld_d[4] <= vld_d[3];
 	end
 end
 assign vld_o = vld_d[WN];

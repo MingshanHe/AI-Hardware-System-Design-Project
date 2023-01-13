@@ -56,9 +56,16 @@ always@(posedge clk, negedge rstn) begin
 	end
 	else begin
 		if(sub_vld_o) begin
-			/* insert your code */
+			/* insert your code */		
+			if(~is_conv3x3_d[WN])	// conv1x1
+				psum <= sub_acc_o;
+			else begin				// conv3x3
+				psum <= psum+sub_acc_o;
+			end	
 			
-			
+		end
+		else begin
+			psum <= 0;
 		end
 	end
 end
@@ -90,6 +97,10 @@ always@(posedge clk, negedge rstn) begin
 			vld_o <= sub_vld_o;
 		else begin				// conv3x3
 			/* insert your code */
+			if(pix_idx == 8)
+				vld_o <= sub_vld_o;
+			else
+				vld_o<=1'b0;
 			
 		end			
 	end
