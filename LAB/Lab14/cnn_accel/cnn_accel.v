@@ -31,7 +31,22 @@ module cnn_accel #(
 	//output signals of control port(slave)
 	out_sl_HREADY,				
 	out_sl_HRESP,
-	out_sl_HRDATA	
+	out_sl_HRDATA,
+
+	// Master port 1: Input image
+	//AHB transactor signals
+	HREADY,
+	HRESP,
+	HRDATA,
+	//output signals outgoing to the AHB lite
+	out_HTRANS,
+	out_HBURST,
+	out_HSIZE,
+	out_HPROT,
+	out_HMASTLOCK,
+	out_HADDR,
+	out_HWRITE,
+	out_HWDATA		
 );
 //CLOCK
 input HCLK;
@@ -49,6 +64,21 @@ input [W_DATA-1:0] sl_HWDATA;
 output out_sl_HREADY;				
 output [`W_RESP-1:0] out_sl_HRESP;
 output reg [W_DATA-1:0] out_sl_HRDATA;
+
+// Master: Input image
+//AHB transactor signals
+input HREADY;
+input [`W_RESP-1:0] HRESP;
+input [W_DATA-1:0] HRDATA;
+//output signals outgoing to the AHB lite
+output [`W_TRANS-1:0] out_HTRANS;
+output [`W_BURST-1:0] out_HBURST;
+output [`W_SIZE-1:0] out_HSIZE;
+output [`W_PROT-1:0] out_HPROT;
+output out_HMASTLOCK;
+output [W_ADDR-1:0] out_HADDR;
+output out_HWRITE;
+output [W_DATA-1:0] out_HWDATA;
 //-----------------------------------------------------------------
 // Registers
 //-----------------------------------------------------------------
@@ -132,11 +162,31 @@ reg [31:0] 				q_input_pixel_data;
 reg [FRAME_SIZE_W-1:0] 	q_input_pixel_addr;
 reg 					q_input_image_load;
 reg [W_ADDR-1:0] 		q_input_image_base_addr;
-reg 					load_image_done = 0;
+reg 					load_image_done;
 wire 					end_frame;
 
 // Convolutional signals
 reg [WI-1:0] in_img [0:FRAME_SIZE-1];// Input image
+reg [FRAME_SIZE_W-1:0] in_pixel_count;
+//{{{
+parameter MAX_TRANS = 1024; //Maximum number of transfers
+parameter BITS_TRANS = $clog2(MAX_TRANS);
+localparam ST_IMG_IDLE 			= 0,
+		ST_IMG_LINE_DATA_LOAD 	= 1,
+		ST_IMG_LINE_DATA_WAIT 	= 2,
+		ST_IMG_DONE				= 3;
+		
+reg [1:0]   c_state_dma, n_state_dma;
+wire [W_DATA-1:0]		data_o_ld;
+wire					data_vld_o_ld;
+wire					data_last_o_ld;
+reg [W_ADDR-1:0]		start_addr_ld;
+reg [W_SIZE-1:0]		start_line_ld;
+reg 					start_dma_ld;
+reg	[BITS_TRANS-1:0]	num_trans_ld;
+wire[BITS_TRANS-1:0]	data_cnt_o; 		//counting the number of data output
+//}}}
+
 reg [9*To*Ti*WI-1:0] 	win_buf;	 // Weight registers
 reg [To*Ti*WI-1:0] win;				 // Weight
 reg [Ti*WI-1:0] din;				 // Input block data
@@ -174,6 +224,11 @@ reg [FRAME_SIZE_W-1:0] pixel_count;
 reg layer_done;
 reg out_buff_sel;
 
+// Boundary-checking flags
+wire is_first_row;
+wire is_last_row ;
+wire is_first_col;
+wire is_last_col ;
 // One-cycle delay signals
 reg ctrl_data_run_d;
 reg [3:0] pix_idx_d;
@@ -181,16 +236,11 @@ reg is_first_row_d;
 reg is_last_row_d ;
 reg is_first_col_d;
 reg is_last_col_d ;
+
 // Clock and reset
 wire clk, rstn;
 assign clk = HCLK;
 assign rstn = HRESETn;
-
-// Boundary-checking flags
-wire is_first_row;
-wire is_last_row ;
-wire is_first_col;
-wire is_last_col ;
 //----------------------------------------------------------
 // Decode Stage: Address Phase
 //----------------------------------------------------------
@@ -328,9 +378,184 @@ cnn_fsm u_cnn_fsm (
 //-------------------------------------------------------------------------------
 // Input feature buffer
 //-------------------------------------------------------------------------------
-initial begin
-	$readmemh(INFILE, in_img ,0,FRAME_SIZE-1);
+//initial begin
+//	$readmemh(INFILE, in_img ,0,FRAME_SIZE-1);
+//end
+integer k;
+always@(posedge clk, negedge rstn)begin
+    if(~rstn) begin	
+		in_pixel_count <= 0;
+	end
+	else begin
+		if(data_vld_o_ld) begin
+			if(in_pixel_count == q_frame_size-1)
+				in_pixel_count <= 0;
+			else 
+				in_pixel_count <= in_pixel_count + 1;
+		end
+	end
 end
+			
+always@(posedge clk, negedge rstn)begin
+    if(~rstn) begin	
+		for(k = 0; k < FRAME_SIZE; k=k+1) begin
+			in_img[k] <= 8'd0;			
+		end
+	end
+	else begin
+		if(data_vld_o_ld) begin
+			in_img[in_pixel_count] <= data_o_ld[7:0];
+		end
+	end
+end
+
+//-------------------------------------------------------------------------------
+// DMA for loading the input image
+//-------------------------------------------------------------------------------
+always@(posedge clk, negedge rstn)begin
+    if(~rstn) 	
+		c_state_dma <= ST_IMG_IDLE;  
+	else begin
+		c_state_dma <= n_state_dma;
+	end
+end
+
+always @(*) begin: dma2buf_fsm
+	n_state_dma = c_state_dma;
+	case(c_state_dma)
+		ST_IMG_IDLE: begin
+			if(q_input_image_load)
+				n_state_dma = ST_IMG_LINE_DATA_LOAD;
+			else 
+				n_state_dma = ST_IMG_IDLE;
+		end
+		ST_IMG_LINE_DATA_LOAD: begin
+			n_state_dma = ST_IMG_LINE_DATA_WAIT;	
+		end
+		ST_IMG_LINE_DATA_WAIT: begin
+			if(data_last_o_ld) begin	
+				if(start_line_ld == q_height-1)
+					n_state_dma = ST_IMG_DONE;
+				else 
+					n_state_dma = ST_IMG_LINE_DATA_LOAD;
+			end
+			else
+				n_state_dma = ST_IMG_LINE_DATA_WAIT;
+		end
+		ST_IMG_DONE:
+			n_state_dma = ST_IMG_IDLE;	
+		default:
+			n_state_dma = ST_IMG_IDLE;	
+	endcase
+end
+
+// Sending a request
+always @(*) begin	
+	start_dma_ld = 1'b0;
+	num_trans_ld = q_width;	
+	if(c_state_dma == ST_IMG_LINE_DATA_LOAD) begin	
+		start_dma_ld = 1'b1;
+	end
+end 
+
+// Update request address and line counter
+always@(posedge clk, negedge rstn)begin
+    if(~rstn) begin	
+		start_addr_ld 	<= 0;
+		start_line_ld 	<= 0;
+		load_image_done <= 0;
+	end
+	else begin
+		if(q_ld_sl_reg && q_sel_sl_reg == CNN_ACCEL_INPUT_IMAGE_LOAD) begin // Reset signals
+			start_line_ld 	<= 0;
+			start_addr_ld 	<= q_input_image_base_addr;
+			load_image_done <= 0;
+		end
+		else begin
+			if(data_last_o_ld) begin	// End of loading a line
+				if(start_line_ld == q_height-1) begin	// Last line
+					start_line_ld <= 0;
+					start_addr_ld <= q_input_image_base_addr;
+					load_image_done <= 1'b1;
+				end
+				else begin	// Normal line
+					start_line_ld <= start_line_ld + 1;
+					start_addr_ld <= start_addr_ld + {q_width,2'b00};
+				end
+			end
+		end
+	end
+end
+
+ dma2buf
+ u_dma2buf (
+	//input bus signals
+	.HREADY(HREADY),
+	.HRESP (HRESP),
+	.HRDATA(HRDATA),
+	// output bus signals
+	.out_HADDR	(out_HADDR),
+	.out_HWDATA	(out_HWDATA),
+	.out_HWRITE	(out_HWRITE),
+	.out_HSIZE	(out_HSIZE),
+	.out_HBURST	(out_HBURST),
+	.out_HTRANS	(out_HTRANS),
+	.out_HMASTLOCK(out_HMASTLOCK),
+	.out_HPROT(out_HPROT),	
+	// input from a buffer controller
+	.start_dma  (start_dma_ld),
+	.num_trans  (num_trans_ld),
+	.start_addr (start_addr_ld),
+	// output to a buffer
+	.data_o		(data_o_ld),
+	.data_vld_o	(data_vld_o_ld),
+	.data_last_o(data_last_o_ld),
+	.data_cnt_o(data_cnt_o),
+	// global signals
+	.clk   (HCLK),
+	.resetn(HRESETn)
+);
+
+////-------------------------------------------------------------------------------
+//// Dummy layer done
+////-------------------------------------------------------------------------------
+//always@(posedge HCLK, negedge HRESETn)
+//begin
+//    if(~HRESETn) begin
+//		layer_done <= 1'b0;
+//    end
+//	else begin
+//		if(q_start)
+//			layer_done <= 0;
+//		else if(end_frame)
+//			layer_done <= 1;
+//	end
+//end
+//
+////-------------------------------------------------
+//// Image Writer
+////-------------------------------------------------
+//// synopsys translate_off
+////wire write_image_by_cpu_done;
+//wire write_image_by_dma_done;
+////bmp_image_writer#(.WIDTH(WIDTH),.HEIGHT(HEIGHT),.OUTFILE("out/input_image_by_cpu.bmp"))
+////u_bmp_image_writer_00(
+////./*input 			*/clk(clk),
+////./*input 			*/rstn(rstn),
+////./*input [WI-1:0] 	*/din(sl_HWDATA[7:0]),
+////./*input 			*/vld(q_ld_sl_reg && (q_sel_sl_reg == CNN_ACCEL_INPUT_IMAGE)),
+////./*output reg 		*/frame_done(write_image_by_cpu_done)
+////);
+//
+//bmp_image_writer#(.WIDTH(WIDTH),.HEIGHT(HEIGHT),.OUTFILE("out/input_image_by_dma.bmp"))
+//u_bmp_image_writer_01(
+//./*input 			*/clk(clk),
+//./*input 			*/rstn(rstn),
+//./*input [WI-1:0] 	*/din(data_o_ld[7:0]),
+//./*input 			*/vld(data_vld_o_ld),
+//./*output reg 		*/frame_done(write_image_by_dma_done)
+//);
+//// synopsys translate_on
 
 //-------------------------------------------------------------------------------
 // Generate vld_i, din, win
@@ -344,15 +569,15 @@ always@(*) begin
 		fmap_buf_enb02 = !out_buff_sel & ctrl_data_run;	
 		if(q_is_conv3x3) begin
 			case(pix_idx) 
-				4'd0: /*Insert your code*/;
-				4'd1: /*Insert your code*/;
-				4'd2: /*Insert your code*/;
-				4'd3: /*Insert your code*/;
-				4'd4: fmap_buf_addrb = 	data_count;		
-				4'd5: /*Insert your code*/;
-				4'd6: /*Insert your code*/;
-				4'd7: /*Insert your code*/;
-				4'd8: /*Insert your code*/;
+				4'd0: fmap_buf_addrb = (is_first_row | is_first_col)? data_count: (data_count - q_width - 1);
+				4'd1: fmap_buf_addrb = (is_first_row               )? data_count: (data_count - q_width    );
+				4'd2: fmap_buf_addrb = (is_first_row | is_last_col )? data_count: (data_count - q_width + 1);
+				4'd3: fmap_buf_addrb = (			   is_first_col)? data_count: (data_count           - 1);
+				4'd4: fmap_buf_addrb = 								         	   data_count               ;		
+				4'd5: fmap_buf_addrb = (               is_last_col )? data_count: (data_count           + 1);
+				4'd6: fmap_buf_addrb = (is_last_row  | is_first_col)? data_count: (data_count + q_width - 1);
+				4'd7: fmap_buf_addrb = (is_last_row  		       )? data_count: (data_count + q_width    );
+				4'd8: fmap_buf_addrb = (is_last_row  | is_last_col )? data_count: (data_count + q_width + 1);		
 				default: begin
 				end			
 			endcase
@@ -410,30 +635,30 @@ always@(*) begin
 			if(q_is_conv3x3) begin		// CONV3x3					
 				if(out_buff_sel) begin
 					case(pix_idx_d) 
-						4'd0: /*Insert your code*/;
-						4'd1: /*Insert your code*/;
-						4'd2: /*Insert your code*/;
-						4'd3: /*Insert your code*/;
-						4'd4: din = fmap_buf_dob01;		
-						4'd5: /*Insert your code*/;
-						4'd6: /*Insert your code*/;
-						4'd7: /*Insert your code*/;
-						4'd8: /*Insert your code*/;
+						4'd0: din = (is_first_row_d | is_first_col_d)? 'd0: fmap_buf_dob01;
+						4'd1: din = (is_first_row_d                 )? 'd0: fmap_buf_dob01;
+						4'd2: din = (is_first_row_d | is_last_col_d )? 'd0: fmap_buf_dob01;
+						4'd3: din = (				  is_first_col_d)? 'd0: fmap_buf_dob01;
+						4'd4: din = 								        fmap_buf_dob01;		
+						4'd5: din = (                 is_last_col_d )? 'd0: fmap_buf_dob01;
+						4'd6: din = (is_last_row_d  | is_first_col_d)? 'd0: fmap_buf_dob01;
+						4'd7: din = (is_last_row_d  		        )? 'd0: fmap_buf_dob01;
+						4'd8: din = (is_last_row_d  | is_last_col_d )? 'd0: fmap_buf_dob01;
 						default: begin
 						end			
 					endcase
 				end 
 				else begin
 					case(pix_idx_d) 
-						4'd0: din = /*Insert your code*/;
-						4'd1: din = /*Insert your code*/;
-						4'd2: din = /*Insert your code*/;
-						4'd3: din = /*Insert your code*/;
-						4'd4: din = fmap_buf_dob02;		
-						4'd5: din = /*Insert your code*/;
-						4'd6: din = /*Insert your code*/;
-						4'd7: din = /*Insert your code*/;
-						4'd8: din = /*Insert your code*/;
+						4'd0: din = (is_first_row_d | is_first_col_d)? 'd0: fmap_buf_dob02;
+						4'd1: din = (is_first_row_d                 )? 'd0: fmap_buf_dob02;
+						4'd2: din = (is_first_row_d | is_last_col_d )? 'd0: fmap_buf_dob02;
+						4'd3: din = (				  is_first_col_d)? 'd0: fmap_buf_dob02;
+						4'd4: din = 								        fmap_buf_dob02;		
+						4'd5: din = (                 is_last_col_d )? 'd0: fmap_buf_dob02;
+						4'd6: din = (is_last_row_d  | is_first_col_d)? 'd0: fmap_buf_dob02;
+						4'd7: din = (is_last_row_d  		        )? 'd0: fmap_buf_dob02;
+						4'd8: din = (is_last_row_d  | is_last_col_d )? 'd0: fmap_buf_dob02;
 						default: begin
 						end			
 					endcase			
@@ -464,8 +689,7 @@ always@(*) begin
 			end
 		end
 		else begin 				// Conv3x3
-			/*Insert your code*/
-			if(ctrl_vsync_cnt < 9*To) begin
+			if(ctrl_vsync_cnt < To*9) begin
 				weight_buf_en   = 1'b1;
 				weight_buf_we   = 1'b0;
 				weight_buf_addr = q_base_addr_weight + ctrl_vsync_cnt[W_CELL-1:0];
@@ -481,10 +705,9 @@ always@(*) begin
 	param_buf_addr = {W_CELL{1'b0}};
 	if(ctrl_vsync_run) begin
 		if(ctrl_vsync_cnt < To) begin
-			/*Insert your code*/
-			param_buf_en   = 1'b1/*Insert your code*/;
-			param_buf_we   = 1'b0/*Insert your code*/;
-			param_buf_addr = ctrl_vsync_cnt[W_CELL-1:0]/*Insert your code*/;
+			param_buf_en   = 1'b1;
+			param_buf_we   = 1'b0;
+			param_buf_addr = q_base_addr_param + ctrl_vsync_cnt[W_CELL-1:0];
 		end
 	end
 end
@@ -517,10 +740,10 @@ always@(posedge clk, negedge rstn)begin
 		if(weight_buf_en_d)
 			win_buf[(weight_buf_addr_d*Ti*WI)+:(Ti*WI)] <= weight_buf_dout;
 		// Bias/scale
-		/*Insert your code*/
-		if(param_buf_en_d)
-			bias[param_buf_addr_d] <= param_buf_dout_bias;
-			scale[param_buf_addr_d] <= param_buf_dout_scale;
+		if(param_buf_en_d) begin
+			bias [(param_buf_addr_d*PARAM_BITS)+:PARAM_BITS] <= param_buf_dout_bias;
+			scale[(param_buf_addr_d*PARAM_BITS)+:PARAM_BITS] <= param_buf_dout_scale;
+		end
 	end
 end
 
@@ -686,13 +909,23 @@ integer fp_output_L03;
 integer idx;
 always @(posedge clk or negedge rstn) begin
 	if(~rstn) begin
-		fp_output_L01= $fopen("out/conv_output_L01.txt", "w");
-		fp_output_L02= $fopen("out/conv_output_L02.txt", "w");
-		fp_output_L03= $fopen("out/conv_output_L03.txt", "w");
+		//fp_output_L01 = $fopen("out/conv_output_L01.txt", "w");
+		//fp_output_L02 = $fopen("out/conv_output_L02.txt", "w");
+		//fp_output_L03 = $fopen("out/conv_output_L03.txt", "w");
+		fp_output_L01 = 0;
+		fp_output_L02 = 0;
+		fp_output_L03 = 0;		
 		idx <= 0;
 	end
 	else begin
-		if(vld_o[0]) begin
+		if(q_start) begin
+			case(q_layer_index)
+				3'd0: fp_output_L01 = $fopen("out/conv_output_L01.txt", "w");
+				3'd1: fp_output_L02 = $fopen("out/conv_output_L02.txt", "w");
+				3'd2: fp_output_L03 = $fopen("out/conv_output_L03.txt", "w");
+			endcase		
+		end 		
+		else if(vld_o[0]) begin
 			for(idx = To*ACT_BITS/4-1; idx >= 0; idx=idx-1) begin
 				if(idx == 0) begin
 					case(q_layer_index)
@@ -709,8 +942,15 @@ always @(posedge clk or negedge rstn) begin
 					endcase					
 				end
 			end
+			if(pixel_count == q_frame_size-1) begin
+				case(q_layer_index)			
+					3'd0: $fclose(fp_output_L01);
+					3'd1: $fclose(fp_output_L02);
+					3'd2: $fclose(fp_output_L03);		
+				endcase								
+			end
 		end
 	end
 end
-// synopsys translate_off				
+// synopsys translate_on				
 endmodule

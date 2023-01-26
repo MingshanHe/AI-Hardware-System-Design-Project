@@ -249,13 +249,13 @@ begin
 					q_base_addr_param	<= sl_HWDATA[31:20];
 				end
 				CNN_ACCEL_LAYER_CONFIG: begin
-					q_is_first_layer 	<= sl_HWDATA[1: 0]/*Insert your code*/;
-					q_is_last_layer		<= sl_HWDATA[2: 1]/*Insert your code*/;
-					q_is_conv3x3		<= sl_HWDATA[3: 2]/*Insert your code*/;
-					q_act_type			<= sl_HWDATA[4: 3]/*Insert your code*/;
-					q_layer_index		<= sl_HWDATA[8: 4]/*Insert your code*/;
-					q_bias_shift		<= sl_HWDATA[13: 8]/*Insert your code*/;
-					q_act_shift			<= sl_HWDATA[16: 13]/*Insert your code*/;
+					q_is_first_layer 	<= sl_HWDATA[1: 0];
+					q_is_last_layer		<= sl_HWDATA[2: 1];
+					q_is_conv3x3		<= sl_HWDATA[3: 2];
+					q_act_type			<= sl_HWDATA[4: 3];
+					q_layer_index		<= sl_HWDATA[8: 4];
+					q_bias_shift		<= sl_HWDATA[13: 8];
+					q_act_shift			<= sl_HWDATA[16: 13];
 				end
 				CNN_ACCEL_INPUT_IMAGE: 		q_input_pixel_data <= sl_HWDATA;				
 				CNN_ACCEL_INPUT_IMAGE_BASE: q_input_image_base_addr <= sl_HWDATA;
@@ -330,16 +330,16 @@ always@(*) begin
 	din    = 0;
 	// First layer
 	if(q_is_first_layer) begin
-		vld_i = ctrl_data_run/*insert your code*/;
-		din[0*WI+:WI] = (is_first_row | is_first_col) ? 8'd0 : in_img[data_count - q_width - 1]/*Insert your code*/;
-		din[1*WI+:WI] = (is_first_row               ) ? 8'd0 : in_img[data_count - q_width    ]/*Insert your code*/;
-		din[2*WI+:WI] = (is_first_row | is_last_col ) ? 8'd0 : in_img[data_count - q_width + 1]/*Insert your code*/;
-		din[3*WI+:WI] = (			    is_first_col) ? 8'd0 : in_img[data_count           - 1]/*Insert your code*/;
-		din[4*WI+:WI] =                                        in_img[data_count              ]/*Insert your code*/;
-		din[5*WI+:WI] = (               is_last_col ) ? 8'd0 : in_img[data_count           + 1]/*Insert your code*/;
-		din[6*WI+:WI] = (is_last_row  | is_first_col) ? 8'd0 : in_img[data_count + q_width - 1]/*Insert your code*/;
-		din[7*WI+:WI] = (is_last_row                ) ? 8'd0 : in_img[data_count + q_width    ]/*Insert your code*/;
-		din[8*WI+:WI] = (is_last_row  | is_last_col ) ? 8'd0 : in_img[data_count + q_width + 1]/*Insert your code*/;		
+		vld_i = ctrl_data_run;
+		din[0*WI+:WI] = (is_first_row | is_first_col) ? 8'd0 : in_img[data_count - q_width - 1];
+		din[1*WI+:WI] = (is_first_row               ) ? 8'd0 : in_img[data_count - q_width    ];
+		din[2*WI+:WI] = (is_first_row | is_last_col ) ? 8'd0 : in_img[data_count - q_width + 1];
+		din[3*WI+:WI] = (			    is_first_col) ? 8'd0 : in_img[data_count           - 1];
+		din[4*WI+:WI] =                                        in_img[data_count              ];
+		din[5*WI+:WI] = (               is_last_col ) ? 8'd0 : in_img[data_count           + 1];
+		din[6*WI+:WI] = (is_last_row  | is_first_col) ? 8'd0 : in_img[data_count + q_width - 1];
+		din[7*WI+:WI] = (is_last_row                ) ? 8'd0 : in_img[data_count + q_width    ];
+		din[8*WI+:WI] = (is_last_row  | is_last_col ) ? 8'd0 : in_img[data_count + q_width + 1];				
 	end
 	else begin
 		vld_i = ctrl_data_run;	//Dummy
@@ -364,9 +364,9 @@ always@(*) begin
 		end
 		else begin				// Conv3x3
 			// Insert your code
-			if(ctrl_vsync_cnt < 9 * To) begin
-				weight_buf_en  = 1'b1;
-				weight_buf_we = 1'b0;
+			if(ctrl_vsync_cnt < 9*To) begin
+				weight_buf_en   = 1'b1;
+				weight_buf_we   = 1'b0;
 				weight_buf_addr = ctrl_vsync_cnt[W_CELL-1:0];
 			end
 		end
@@ -381,9 +381,9 @@ always@(*) begin
 	if(ctrl_vsync_run) begin
 									
 		if(ctrl_vsync_cnt < To) begin
-			param_buf_en   = 1'b1/*Insert your code*/;
-			param_buf_we   = 1'b0/*Insert your code*/;
-			param_buf_addr = ctrl_vsync_cnt[W_CELL-1:0]/*Insert your code*/;
+			param_buf_en   = 1'b1;
+			param_buf_we   = 1'b0;
+			param_buf_addr = ctrl_vsync_cnt[W_CELL-1:0];
 	  
 		end
 	end
@@ -437,9 +437,9 @@ u_buf_weight(
     .dout(weight_buf_dout)  // Data output
 );
 // Bias buffer
-spram #(.INIT_FILE("input_data/all_conv_biases.hex"/*Insert your code*/),
+spram #(.INIT_FILE("input_data/all_conv_biases.hex"),
 		.EN_LOAD_INIT_FILE(EN_LOAD_INIT_FILE),
-		.W_DATA(PARAM_BITS/*Insert your code*/),.W_WORD(W_CELL_PARAM),.N_WORD(N_CELL_PARAM))
+		.W_DATA(PARAM_BITS),.W_WORD(W_CELL_PARAM),.N_WORD(N_CELL_PARAM))
 u_buf_bias(
     .clk (clk                ), // Clock input
     .en  (param_buf_en       ), // RAM enable (select)
@@ -449,16 +449,16 @@ u_buf_bias(
     .dout(param_buf_dout_bias)  // Data output
 );
 // Scale buffer
-spram #(.INIT_FILE("input_data/all_conv_scales.hex"/*Insert your code*/),
+spram #(.INIT_FILE("input_data/all_conv_scales.hex"),
 		.EN_LOAD_INIT_FILE(EN_LOAD_INIT_FILE),
-		.W_DATA(PARAM_BITS/*Insert your code*/),.W_WORD(W_CELL_PARAM),.N_WORD(N_CELL_PARAM))
+		.W_DATA(PARAM_BITS),.W_WORD(W_CELL_PARAM),.N_WORD(N_CELL_PARAM))
 u_buf_scale(
     .clk (clk                 ), // Clock input
-    .en  (param_buf_en/*Insert your code*/), // RAM enable (select)
-    .addr(param_buf_addr/*Insert your code*/), // Address input(word addressing)
+    .en  (param_buf_en), // RAM enable (select)
+    .addr(param_buf_addr), // Address input(word addressing)
     .din (/*unused*/          ), // Data input
-    .we  (param_buf_we/*Insert your code*/), // Write enable
-    .dout(param_buf_dout_scale/*Insert your code*/)  // Data output
+    .we  (param_buf_we), // Write enable
+    .dout(param_buf_dout_scale)  // Data output
 );
 //-------------------------------------------------------------------------------																			 
 // Computing units

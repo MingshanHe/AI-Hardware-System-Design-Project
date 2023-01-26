@@ -170,6 +170,7 @@ begin
 end
 assign end_frame = (data_count == (q_width*q_height-1) /*Insert your code*/)? 1'b1: 1'b0;		
 
+
 //-------------------------------------------------
 // Outputs
 //-------------------------------------------------

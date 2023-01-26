@@ -96,10 +96,10 @@ always @(*) begin
 				nstate = ST_HSYNC;
         end		
         ST_DATA: begin
-			if(end_frame /* Insert your code*/)		//end of frame
+			if(end_frame && (!q_is_conv3x3 || (pix_idx==8)))		//end of frame
 				nstate = ST_IDLE;
 			else begin
-				if((col == q_width-1) /* Insert your code*/)    //end of line
+				if((col == q_width-1) && (!q_is_conv3x3 || (pix_idx==8)))    //end of line
 				nstate = ST_HSYNC;
 			else
 				nstate = ST_DATA;
@@ -143,7 +143,7 @@ begin
 		col <= 0;
     end
 	else begin
-		if(ctrl_data_run &&(!q_is_conv3x3 || (pix_idx == 8)) /* Insert your code*/) begin
+		if(ctrl_data_run && (!q_is_conv3x3 || (pix_idx==8))) begin
 			if(col == q_width - 1) begin
 				if(end_frame)
 					row <= 0;			
@@ -163,7 +163,7 @@ begin
         data_count <= 0;
     end
     else begin
-        if(ctrl_data_run && (!q_is_conv3x3 || (pix_idx == 8))/* Insert your code*/) begin
+        if(ctrl_data_run && (!q_is_conv3x3 || (pix_idx==8))) begin
 			if(!end_frame)
 				data_count <= data_count + 1;
 			else

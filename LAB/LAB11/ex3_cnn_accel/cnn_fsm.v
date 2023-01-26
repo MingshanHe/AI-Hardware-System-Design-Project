@@ -96,7 +96,7 @@ always @(*) begin
                 if(end_frame)    //end of frame
                     nstate = ST_IDLE;
                 else begin
-                    if(col == q_width - 2/*Insert your code*/)//end of line
+                    if(col == q_width - 1/*Insert your code*/)//end of line
                        nstate = ST_HSYNC;
                     else
                        nstate = ST_DATA;
