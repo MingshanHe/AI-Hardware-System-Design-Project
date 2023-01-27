@@ -22,3 +22,5 @@ for ch = 1:4
         imshow(uint8(img_diff));
     end
 end
+fprintf('HE MINGSHAN\n');
+fprintf('2022-24052\n');

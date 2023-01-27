@@ -29,7 +29,7 @@ export_fname = ['export_data/',model_name,'.txt'];
 up_scale = 2;
 
 imname = 'butterfly_GT';
-image_name = 'img\butterfly_GT.BMP';
+image_name = 'img/butterfly_GT.bmp';
 net_w = 128;
 net_h = 128;
 
