@@ -33,7 +33,7 @@ parameter INIT_FILE = "img/butterfly_32bit.hex";
 parameter Ti = 16;	// Each CONV kernel do 16 multipliers at the same time	
 parameter To = 16;	// Run 16 CONV kernels at the same time
 parameter N  = 16;
-parameter N_LAYER 		= 3;
+parameter N_LAYER 		= 8;	/*Insert: Number of Layers*/
 parameter N_CELL  		= N_LAYER * (Ti*To*9)/N;
 parameter N_CELL_PARAM	= N_LAYER * (To);
 parameter W_CELL 		= $clog2(N_CELL);
@@ -121,9 +121,15 @@ initial begin
 	q_layer_config		= 32'h0;
 	is_conv3x3          = 0;
 	// Define Network's parameters
+	/*Insert: Define Layer parameters*/
 	q_bias_shift[0] = 9 ; q_act_shift[0] = 7; q_is_conv3x3[0] = 0;
-	q_bias_shift[1] = 17; q_act_shift[1] = 7; q_is_conv3x3[1] = 1;
+	q_bias_shift[1] = 17; q_act_shift[1] = 7; q_is_conv3x3[1] = 0;
 	q_bias_shift[2] = 17; q_act_shift[2] = 7; q_is_conv3x3[2] = 1;
+	q_bias_shift[3] = 9 ; q_act_shift[3] = 7; q_is_conv3x3[3] = 1;
+	q_bias_shift[4] = 17; q_act_shift[4] = 7; q_is_conv3x3[4] = 1;
+	q_bias_shift[5] = 17; q_act_shift[5] = 7; q_is_conv3x3[5] = 1;
+	q_bias_shift[6] = 9 ; q_act_shift[6] = 7; q_is_conv3x3[6] = 0;
+	q_bias_shift[7] = 17; q_act_shift[7] = 7; q_is_conv3x3[7] = 1;
 	// Loop/Layer index
 	idx = 0;
 	

@@ -105,7 +105,7 @@ localparam W_DELAY = 12;
 
 // Block ram for weights
 parameter N_DELAY 	    = 1;		
-parameter N_LAYER 		= 3;
+parameter N_LAYER 		= 8; /*Insert: N_LAYER to be 8*/
 parameter N_CELL  		= N_LAYER * (Ti*To*9)/N;
 parameter N_CELL_PARAM	= N_LAYER * (To);
 parameter W_CELL 		= $clog2(N_CELL);
@@ -904,6 +904,7 @@ u_bmp_image_writer_03(
 );
 
 // Debugging
+/*
 integer fp_output_L01;
 integer fp_output_L02;
 integer fp_output_L03;
@@ -954,5 +955,6 @@ always @(posedge clk or negedge rstn) begin
 		end
 	end
 end
+*/
 // synopsys translate_on				
 endmodule
