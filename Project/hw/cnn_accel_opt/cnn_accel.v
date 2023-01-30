@@ -182,7 +182,7 @@ wire					data_vld_o_ld;
 wire					data_last_o_ld;
 reg [W_ADDR-1:0]		start_addr_ld;
 reg [W_SIZE-1:0]		start_line_ld;
-reg 					start_dma_ld;
+reg 					start_dma_ld; 
 reg	[BITS_TRANS-1:0]	num_trans_ld;
 wire[BITS_TRANS-1:0]	data_cnt_o; 		//counting the number of data output
 //}}}
@@ -904,55 +904,55 @@ u_bmp_image_writer_03(
 );
 
 // Debugging
-integer fp_output_L01;
-integer fp_output_L02;
-integer fp_output_L03;
+// integer fp_output_L01;
+// integer fp_output_L02;
+// integer fp_output_L03;
 
-integer idx;
-always @(posedge clk or negedge rstn) begin
-	if(~rstn) begin
-		//fp_output_L01 = $fopen("out/conv_output_L01.txt", "w");
-		//fp_output_L02 = $fopen("out/conv_output_L02.txt", "w");
-		//fp_output_L03 = $fopen("out/conv_output_L03.txt", "w");
-		fp_output_L01 = 0;
-		fp_output_L02 = 0;
-		fp_output_L03 = 0;		
-		idx <= 0;
-	end
-	else begin
-		if(q_start) begin
-			case(q_layer_index)
-				3'd0: fp_output_L01 = $fopen("out/conv_output_L01.txt", "w");
-				3'd1: fp_output_L02 = $fopen("out/conv_output_L02.txt", "w");
-				3'd2: fp_output_L03 = $fopen("out/conv_output_L03.txt", "w");
-			endcase		
-		end 		
-		else if(vld_o[0]) begin
-			for(idx = To*ACT_BITS/4-1; idx >= 0; idx=idx-1) begin
-				if(idx == 0) begin
-					case(q_layer_index)
-						3'd0: $fwrite(fp_output_L01,"%01h\n", acc_o[idx*4+:4]);
-						3'd1: $fwrite(fp_output_L02,"%01h\n", acc_o[idx*4+:4]);
-						3'd2: $fwrite(fp_output_L03,"%01h\n", acc_o[idx*4+:4]);
-					endcase
-				end	
-				else begin
-					case(q_layer_index)
-						3'd0: $fwrite(fp_output_L01,"%01h", acc_o[idx*4+:4]);
-						3'd1: $fwrite(fp_output_L02,"%01h", acc_o[idx*4+:4]);
-						3'd2: $fwrite(fp_output_L03,"%01h", acc_o[idx*4+:4]);
-					endcase					
-				end
-			end
-			if(pixel_count == q_frame_size-1) begin
-				case(q_layer_index)			
-					3'd0: $fclose(fp_output_L01);
-					3'd1: $fclose(fp_output_L02);
-					3'd2: $fclose(fp_output_L03);		
-				endcase								
-			end
-		end
-	end
-end
+// integer idx;
+// always @(posedge clk or negedge rstn) begin
+// 	if(~rstn) begin
+// 		//fp_output_L01 = $fopen("out/conv_output_L01.txt", "w");
+// 		//fp_output_L02 = $fopen("out/conv_output_L02.txt", "w");
+// 		//fp_output_L03 = $fopen("out/conv_output_L03.txt", "w");
+// 		fp_output_L01 = 0;
+// 		fp_output_L02 = 0;
+// 		fp_output_L03 = 0;		
+// 		idx <= 0;
+// 	end
+// 	else begin
+// 		if(q_start) begin
+// 			case(q_layer_index)
+// 				3'd0: fp_output_L01 = $fopen("out/conv_output_L01.txt", "w");
+// 				3'd1: fp_output_L02 = $fopen("out/conv_output_L02.txt", "w");
+// 				3'd2: fp_output_L03 = $fopen("out/conv_output_L03.txt", "w");
+// 			endcase		
+// 		end 		
+// 		else if(vld_o[0]) begin
+// 			for(idx = To*ACT_BITS/4-1; idx >= 0; idx=idx-1) begin
+// 				if(idx == 0) begin
+// 					case(q_layer_index)
+// 						3'd0: $fwrite(fp_output_L01,"%01h\n", acc_o[idx*4+:4]);
+// 						3'd1: $fwrite(fp_output_L02,"%01h\n", acc_o[idx*4+:4]);
+// 						3'd2: $fwrite(fp_output_L03,"%01h\n", acc_o[idx*4+:4]);
+// 					endcase
+// 				end	
+// 				else begin
+// 					case(q_layer_index)
+// 						3'd0: $fwrite(fp_output_L01,"%01h", acc_o[idx*4+:4]);
+// 						3'd1: $fwrite(fp_output_L02,"%01h", acc_o[idx*4+:4]);
+// 						3'd2: $fwrite(fp_output_L03,"%01h", acc_o[idx*4+:4]);
+// 					endcase					
+// 				end
+// 			end
+// 			if(pixel_count == q_frame_size-1) begin
+// 				case(q_layer_index)			
+// 					3'd0: $fclose(fp_output_L01);
+// 					3'd1: $fclose(fp_output_L02);
+// 					3'd2: $fclose(fp_output_L03);		
+// 				endcase								
+// 			end
+// 		end
+// 	end
+// end
 // synopsys translate_on				
 endmodule
